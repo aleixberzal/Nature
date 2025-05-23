@@ -41,6 +41,8 @@ public class PlayerMovement : MonoBehaviour
     //Dash Timers
     public float dashTimer = 0;
     public float dashCooldownTimer = 0;
+    
+    //Player Attack 
 
 
     //Camera Flip
