@@ -4,27 +4,47 @@ using UnityEngine;
 
 public class MovingPlatform : MonoBehaviour
 {
-
     public Transform posA, posB;
-    public float speed;
-    Vector3 targetPos;
-    // Start is called before the first frame update
+    public float speed = 2f;
+
+    public bool waitAtPoints = false;
+    public float waitTime = 1.0f;
+
+    private Vector3 targetPos;
+    private float waitTimer = 0f;
+    private bool isWaiting = false;
+
     void Start()
     {
         targetPos = posA.position;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if(Vector2.Distance(transform.position, posA.position) < 0.5f)
+        if (isWaiting)
         {
-            targetPos = posB.position;
+            waitTimer -= Time.deltaTime;
+            if (waitTimer <= 0f)
+            {
+                isWaiting = false;
+            }
+            return;
         }
-        if (Vector2.Distance(transform.position, posB.position) < 0.5f)
-        {
-            targetPos = posA.position;
-        }
+
         transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
+
+        if (Vector2.Distance(transform.position, targetPos) < 0.1f)
+        {
+            if (targetPos == posA.position)
+                targetPos = posB.position;
+            else
+                targetPos = posA.position;
+
+            if (waitAtPoints)
+            {
+                isWaiting = true;
+                waitTimer = waitTime;
+            }
+        }
     }
 }

@@ -22,17 +22,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (life < 1)
-        {
-            Destroy(hearts[0].gameObject);
-        }else if (life < 2)
-        {
-            Destroy(hearts[1].gameObject);
-        }
-        else if (life < 3)
-        {
-            Destroy(hearts[2].gameObject);
-        }
+      
     }
 
     //Respawner
@@ -54,6 +44,19 @@ public class PlayerController : MonoBehaviour
         {
             transform.position = checkpointPos; 
             takeDamage(1);
+
+            if (life < 1)
+            {
+                Destroy(hearts[0].gameObject);
+            }
+            else if (life < 2)
+            {
+                Destroy(hearts[1].gameObject);
+            }
+            else if (life < 3)
+            {
+                Destroy(hearts[2].gameObject);
+            }
         }
     }
 

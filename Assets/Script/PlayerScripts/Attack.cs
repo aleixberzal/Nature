@@ -4,79 +4,35 @@ using UnityEngine;
 
 public class Attack : MonoBehaviour
 {
-    bool attack = false;
-    float timeBetweenAttack = 0.5f; // medio segundo entre ataques
-    float timeSinceAttack = 0;
+    public Transform attackOrigin;
+    public float attackRadius = 1.0f;
+    public LayerMask enemyMask;
 
-    public Transform sideTransform, upTransform, downTransform;
-    public Vector2 sideArea, upArea, downArea;
-    public LayerMask enemyLayer;
-
-    private float yAxis, xAxis;
-
-    void Update()
+    public int attackDamage = 25;
+    public float cooldown = .5f;
+    private float cooldownTimer = 0f;
+    private void Update()
     {
-        GetInputs();
-        AttackInput();
-    }
-
-    void GetInputs()
-    {
-        xAxis = Input.GetAxisRaw("Horizontal");
-        yAxis = Input.GetAxisRaw("Vertical");
-    }
-
-    void AttackInput()
-    {
-        if (Input.GetKeyDown(KeyCode.X))
+        if (cooldownTimer <= 0f)
         {
-            attack = true;
-            AttackAction();
-           
-        }
-        else
-        {
-            attack = false;
-        }
-    }
-
-    void AttackAction()
-    {
-        timeSinceAttack += Time.deltaTime;
-
-        if (attack && timeSinceAttack >= timeBetweenAttack)
-        {
-            timeSinceAttack = 0;
-
-
-            if (yAxis == 0 || xAxis != 0)
+            if (Input.GetKeyUp(KeyCode.X))
             {
-            
-                Hit(sideTransform, sideArea);
-            }
-            else if (yAxis > 0)
-            {
-                Hit(upTransform, upArea);
-            }
-            else if (yAxis < 0)
-            {
-                Hit(downTransform, downArea);
+                Collider2D[] enemiesInRange = Physics2D.OverlapCircleAll(attackOrigin.position, attackRadius, enemyMask);
+
+                foreach (var enemy in enemiesInRange)
+                {
+                    Destroy(enemy.gameObject);
+                }
+                cooldownTimer = cooldown;
             }
         }
-    }
-
-    private void Hit(Transform attackTransform, Vector2 attackArea)
-    {
-        Collider2D[] hits = Physics2D.OverlapBoxAll(attackTransform.position, attackArea, 0);
-        foreach (Collider2D hit in hits)
-        {
-            Debug.Log("Golpeado: " + hit.name);
-            Destroy(hit.gameObject);
+        else { 
+            cooldownTimer -= Time.deltaTime;
         }
+       
     }
-
-
-
- 
-
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(attackOrigin.position, attackRadius);
+    }
 }
