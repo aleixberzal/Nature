@@ -35,10 +35,10 @@ public class PlayerController : MonoBehaviour
             checkpointPos = collision.transform.position;
 
             SpriteRenderer checkpointRenderer = collision.GetComponent<SpriteRenderer>();
-            if (checkpointRenderer != null)
-            {
-                checkpointRenderer.sprite = active;
-            }
+            /* if (checkpointRenderer != null)
+             {
+                 checkpointRenderer.sprite = active;
+             }*/
         }
         else if (collision.CompareTag("Respawn"))//When player triggers something with the tag Respawn, it is teleported to the last touched checkpoint
         {
@@ -48,6 +48,7 @@ public class PlayerController : MonoBehaviour
             if (life < 1)
             {
                 Destroy(hearts[0].gameObject);
+                Destroy(gameObject);
             }
             else if (life < 2)
             {

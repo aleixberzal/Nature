@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    //Animation variables
+    private Animator animator;
+
     //Run variables
     private Rigidbody2D rb;
     public float playerSpeed;
@@ -41,8 +44,10 @@ public class PlayerMovement : MonoBehaviour
     //Dash Timers
     public float dashTimer = 0;
     public float dashCooldownTimer = 0;
-    
-    //Player Attack 
+
+    //Awards
+    public bool dashUpgrade = false;
+    public bool doubleJumpUpgrade = false;
 
 
     //Camera Flip
@@ -54,11 +59,15 @@ public class PlayerMovement : MonoBehaviour
         pState = GetComponent<PlayerStateList>();
         rb = GetComponent<Rigidbody2D>();
         gravity = rb.gravityScale;
+        animator = GetComponent<Animator>();
+
     }
 
     // Update is called once per frame
     void Update()
     {
+
+      
         GetPlayerInputs();
         JumpVariables();
 
@@ -85,6 +94,20 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("dashObject"))
+        {
+            dashUpgrade = true;
+            Destroy(collision.gameObject);
+        }else if (collision.CompareTag("jumpObject"))
+        {
+            doubleJumpUpgrade = true;
+            Destroy(collision.gameObject);
+
+        }
+    }
+
     void Flip()
     {
         //We transform the rotation in the y axis because it respects the script
@@ -107,23 +130,51 @@ public class PlayerMovement : MonoBehaviour
     void GetPlayerInputs()
     {
         xAxis = Input.GetAxisRaw("Horizontal");
+
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            dashUpgrade = true;
+        }else if (Input.GetKeyDown(KeyCode.O))
+        {
+            doubleJumpUpgrade = true;
+        }
+
     }
     void Run()
     {
         rb.velocity = new Vector2(playerSpeed * xAxis, rb.velocity.y);
+
+        if (animator != null)
+        {
+            if (xAxis != 0)
+            {
+                animator.ResetTrigger("iddleTrigger");
+                animator.SetTrigger("runTrigger");
+            }
+            else
+            {
+                animator.ResetTrigger("runTrigger");
+                animator.SetTrigger("iddleTrigger");
+            }
+        }
     }
+
     void StartDash()
     {
         if (Input.GetButtonDown("Dash") && canDash && !dashed)
         {
-            //We apply all the cooldowns before actually dashing and then add a boost of speed that we decide with a public float 
-            pState.dashing = true;
-            dashTimer = dashTime;
-            canDash = false;
-            dashCooldownTimer = dashCooldown;
-            rb.gravityScale = 0;
-            rb.velocity = new Vector2(transform.localScale.x * dashSpeed, 0);
-            dashed = true;
+            if (dashUpgrade)
+            {
+                //We apply all the cooldowns before actually dashing and then add a boost of speed that we decide with a public float 
+                pState.dashing = true;
+                dashTimer = dashTime;
+                canDash = false;
+                dashCooldownTimer = dashCooldown;
+                rb.gravityScale = 0;
+                rb.velocity = new Vector2(transform.localScale.x * dashSpeed, 0);
+                dashed = true;
+            }
+           
         }
         //Once we are touching the ground we can start another dash after its cooldown
         if (Grounded())
@@ -176,11 +227,14 @@ public class PlayerMovement : MonoBehaviour
 
             }else if (!Grounded() && airJumpCounter < maxAirJumps && Input.GetButtonDown("Jump"))
             {
-                //If we have jumped, we update the player state while adding a count of the jumpCounter
-                pState.jumping = true;
-                airJumpCounter++;
-                rb.velocity = new Vector3(rb.velocity.x, jumpForce);
-
+                if (doubleJumpUpgrade)
+                {
+                    //If we have jumped, we update the player state while adding a count of the jumpCounter
+                    pState.jumping = true;
+                    airJumpCounter++;
+                    rb.velocity = new Vector3(rb.velocity.x, jumpForce);
+                }
+                
             }
         }
 
